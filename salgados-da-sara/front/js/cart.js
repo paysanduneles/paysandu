@@ -1,7 +1,7 @@
 // Cart Module
 const Cart = {
     items: [],
-    deliveryFee: 10.00,
+    taxaEntrega: 10.00,
 
     // Initialize cart
     init: async () => {
@@ -14,9 +14,9 @@ const Cart = {
     // Load delivery fee from API
     loadDeliveryFee: async () => {
         try {
-            const response = await API.config.get('delivery_fee');
-            if (response.success && response.data.delivery_fee) {
-                Cart.deliveryFee = parseFloat(response.data.delivery_fee);
+            const response = await API.config.get('taxa_entrega');
+            if (response.sucesso && response.dados.taxa_entrega) {
+                Cart.taxaEntrega = parseFloat(response.dados.taxa_entrega);
             }
         } catch (error) {
             console.error('Erro ao carregar taxa de entrega:', error);
@@ -25,7 +25,7 @@ const Cart = {
 
     // Load cart from localStorage (mantém funcionalidade local)
     loadCart: () => {
-        Cart.items = Utils.storage.get('cart') || [];
+        Cart.items = Utils.storage.get('carrinho') || [];
         Cart.renderCart();
         Cart.updateCartCount();
         Cart.updateCartSummary();
@@ -33,7 +33,7 @@ const Cart = {
 
     // Save cart to localStorage
     saveCart: () => {
-        Utils.storage.set('cart', Cart.items);
+        Utils.storage.set('carrinho', Cart.items);
         Cart.updateCartCount();
     },
 
@@ -127,7 +127,7 @@ const Cart = {
             <div class="cart-item">
                 <div class="cart-item-header">
                     <div class="cart-item-info">
-                        <h3>${item.name}</h3>
+                        <h3>${item.nome}</h3>
                         <div class="quantity-type">
                             ${Utils.getQuantityLabel(item.quantityType, item.unitCount)}
                         </div>
@@ -174,7 +174,7 @@ const Cart = {
 
         const subtotal = Cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
         const isDelivery = document.querySelector('input[name="delivery"]:checked')?.value === 'delivery';
-        const deliveryFee = isDelivery ? Cart.deliveryFee : 0;
+        const deliveryFee = isDelivery ? Cart.taxaEntrega : 0;
         const total = subtotal + deliveryFee;
 
         subtotalEl.textContent = Utils.formatCurrency(subtotal);
@@ -200,9 +200,9 @@ const Cart = {
     getOrderSummary: () => {
         const subtotal = Cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
         const isDelivery = document.querySelector('input[name="delivery"]:checked')?.value === 'delivery';
-        const deliveryFee = isDelivery ? Cart.deliveryFee : 0;
+        const deliveryFee = isDelivery ? Cart.taxaEntrega : 0;
         const total = subtotal + deliveryFee;
-        const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || 'cash';
+        const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value || 'dinheiro';
 
         return {
             items: Cart.items,
@@ -232,8 +232,8 @@ async function finalizeOrder() {
         return;
     }
 
-    const currentUser = Auth.getCurrentUser();
-    if (!currentUser) {
+    const usuarioAtual = Auth.getCurrentUser();
+    if (!usuarioAtual) {
         Utils.showMessage('Você precisa estar logado para finalizar o pedido!', 'error');
         return;
     }
@@ -241,16 +241,16 @@ async function finalizeOrder() {
     const orderSummary = Cart.getOrderSummary();
     
     // Create order data for API
-    const orderData = {
-        user_id: currentUser.id,
+    const dadosPedido = {
+        user_id: usuarioAtual.id,
         customer_data: {
-            name: currentUser.name,
-            phone: currentUser.phone,
-            email: currentUser.email,
-            address: currentUser.address,
-            number: currentUser.number,
-            complement: currentUser.complement,
-            city: currentUser.city
+            name: usuarioAtual.nome,
+            phone: usuarioAtual.telefone,
+            email: usuarioAtual.email,
+            address: usuarioAtual.endereco,
+            number: usuarioAtual.numero,
+            complement: usuarioAtual.complemento,
+            city: usuarioAtual.cidade
         },
         items: orderSummary.items,
         subtotal: orderSummary.subtotal,
@@ -262,21 +262,21 @@ async function finalizeOrder() {
 
     try {
         Utils.setLoading(true);
-        const response = await API.orders.create(orderData);
+        const response = await API.orders.create(dadosPedido);
         
-        if (response.success) {
+        if (response.sucesso) {
             // Clear cart
             Cart.clearCart();
 
             // Show success message
-            Utils.showMessage(`Pedido ${response.order_number} realizado com sucesso!`);
+            Utils.showMessage(`Pedido ${response.numero_pedido} realizado com sucesso!`);
             
             // Redirect to history
             setTimeout(() => {
                 showPage('historico');
             }, 2000);
         } else {
-            throw new Error(response.message);
+            throw new Error(response.mensagem);
         }
     } catch (error) {
         Utils.showMessage('Erro ao finalizar pedido: ' + error.message, 'error');

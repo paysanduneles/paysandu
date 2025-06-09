@@ -1,35 +1,35 @@
 <?php
 class Admin {
     private $conn;
-    private $table_name = "admin_users";
+    private $table_name = "usuarios_admin";
 
     public $id;
-    public $username;
-    public $password;
-    public $role;
-    public $created_at;
+    public $nome_usuario;
+    public $senha;
+    public $funcao;
+    public $criado_em;
 
     public function __construct($db) {
         $this->conn = $db;
     }
 
-    // Create admin
+    // Criar admin
     function create() {
         $query = "INSERT INTO " . $this->table_name . " 
-                  (username, password, role) 
-                  VALUES (:username, :password, :role)";
+                  (nome_usuario, senha, funcao) 
+                  VALUES (:nome_usuario, :senha, :funcao)";
 
         $stmt = $this->conn->prepare($query);
 
-        // Sanitize
-        $this->username = htmlspecialchars(strip_tags($this->username));
-        $this->password = password_hash($this->password, PASSWORD_DEFAULT);
-        $this->role = htmlspecialchars(strip_tags($this->role));
+        // Sanitizar
+        $this->nome_usuario = htmlspecialchars(strip_tags($this->nome_usuario));
+        $this->senha = password_hash($this->senha, PASSWORD_DEFAULT);
+        $this->funcao = htmlspecialchars(strip_tags($this->funcao));
 
         // Bind values
-        $stmt->bindParam(":username", $this->username);
-        $stmt->bindParam(":password", $this->password);
-        $stmt->bindParam(":role", $this->role);
+        $stmt->bindParam(":nome_usuario", $this->nome_usuario);
+        $stmt->bindParam(":senha", $this->senha);
+        $stmt->bindParam(":funcao", $this->funcao);
 
         if($stmt->execute()) {
             $this->id = $this->conn->lastInsertId();
@@ -40,23 +40,23 @@ class Admin {
     }
 
     // Login admin
-    function login($username, $password) {
-        $query = "SELECT id, username, password, role, created_at 
+    function login($nome_usuario, $senha) {
+        $query = "SELECT id, nome_usuario, senha, funcao, criado_em 
                   FROM " . $this->table_name . " 
-                  WHERE username = :username";
+                  WHERE nome_usuario = :nome_usuario";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":username", $username);
+        $stmt->bindParam(":nome_usuario", $nome_usuario);
         $stmt->execute();
 
         if($stmt->rowCount() > 0) {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            if(password_verify($password, $row['password'])) {
+            if(password_verify($senha, $row['senha'])) {
                 $this->id = $row['id'];
-                $this->username = $row['username'];
-                $this->role = $row['role'];
-                $this->created_at = $row['created_at'];
+                $this->nome_usuario = $row['nome_usuario'];
+                $this->funcao = $row['funcao'];
+                $this->criado_em = $row['criado_em'];
                 return true;
             }
         }
@@ -64,11 +64,11 @@ class Admin {
         return false;
     }
 
-    // Get all admins
+    // Obter todos os admins
     function readAll() {
-        $query = "SELECT id, username, role, created_at 
+        $query = "SELECT id, nome_usuario, funcao, criado_em 
                   FROM " . $this->table_name . " 
-                  ORDER BY created_at DESC";
+                  ORDER BY criado_em DESC";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
@@ -76,7 +76,7 @@ class Admin {
         return $stmt;
     }
 
-    // Delete admin
+    // Excluir admin
     function delete() {
         $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
 
@@ -90,13 +90,13 @@ class Admin {
         return false;
     }
 
-    // Check if username exists
+    // Verificar se nome de usuário existe
     function usernameExists() {
         $query = "SELECT id FROM " . $this->table_name . " 
-                  WHERE username = :username";
+                  WHERE nome_usuario = :nome_usuario";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":username", $this->username);
+        $stmt->bindParam(":nome_usuario", $this->nome_usuario);
         $stmt->execute();
 
         return $stmt->rowCount() > 0;

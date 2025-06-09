@@ -20,22 +20,22 @@ switch($method) {
             if($value !== null) {
                 http_response_code(200);
                 echo json_encode(array(
-                    "success" => true,
-                    "data" => array($key => $value)
+                    "sucesso" => true,
+                    "dados" => array($key => $value)
                 ));
             } else {
                 http_response_code(404);
                 echo json_encode(array(
-                    "success" => false,
-                    "message" => "Configuração não encontrada"
+                    "sucesso" => false,
+                    "mensagem" => "Configuração não encontrada"
                 ));
             }
         } else {
             $all_config = $config->getAll();
             http_response_code(200);
             echo json_encode(array(
-                "success" => true,
-                "data" => $all_config
+                "sucesso" => true,
+                "dados" => $all_config
             ));
         }
         break;
@@ -49,21 +49,21 @@ switch($method) {
             if($config->setValue($data->key, $data->value)) {
                 http_response_code(200);
                 echo json_encode(array(
-                    "success" => true,
-                    "message" => "Configuração atualizada com sucesso!"
+                    "sucesso" => true,
+                    "mensagem" => "Configuração atualizada com sucesso!"
                 ));
             } else {
                 http_response_code(500);
                 echo json_encode(array(
-                    "success" => false,
-                    "message" => "Erro ao atualizar configuração"
+                    "sucesso" => false,
+                    "mensagem" => "Erro ao atualizar configuração"
                 ));
             }
         } else {
             http_response_code(400);
             echo json_encode(array(
-                "success" => false,
-                "message" => "Chave e valor são obrigatórios"
+                "sucesso" => false,
+                "mensagem" => "Chave e valor são obrigatórios"
             ));
         }
         break;
@@ -71,8 +71,8 @@ switch($method) {
     default:
         http_response_code(405);
         echo json_encode(array(
-            "success" => false,
-            "message" => "Método não permitido"
+            "sucesso" => false,
+            "mensagem" => "Método não permitido"
         ));
         break;
 }

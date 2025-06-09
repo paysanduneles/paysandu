@@ -20,21 +20,21 @@ if(!empty($data->phone)) {
         // For demo purposes, we'll return a success message
         http_response_code(200);
         echo json_encode(array(
-            "success" => true,
-            "message" => "Instruções de recuperação de senha foram enviadas para seu telefone"
+            "sucesso" => true,
+            "mensagem" => "Instruções de recuperação de senha foram enviadas para seu telefone"
         ));
     } else {
         http_response_code(404);
         echo json_encode(array(
-            "success" => false,
-            "message" => "Usuário não encontrado"
+            "sucesso" => false,
+            "mensagem" => "Usuário não encontrado"
         ));
     }
 } else {
     http_response_code(400);
     echo json_encode(array(
-        "success" => false,
-        "message" => "Telefone é obrigatório"
+        "sucesso" => false,
+        "mensagem" => "Telefone é obrigatório"
     ));
 }
 ?>

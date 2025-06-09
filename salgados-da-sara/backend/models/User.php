@@ -1,53 +1,53 @@
 <?php
 class User {
     private $conn;
-    private $table_name = "users";
+    private $table_name = "usuarios";
 
     public $id;
-    public $name;
-    public $phone;
+    public $nome;
+    public $telefone;
     public $email;
-    public $address;
-    public $number;
-    public $complement;
-    public $city;
-    public $password;
-    public $is_admin;
-    public $created_at;
+    public $endereco;
+    public $numero;
+    public $complemento;
+    public $cidade;
+    public $senha;
+    public $eh_admin;
+    public $criado_em;
 
     public function __construct($db) {
         $this->conn = $db;
     }
 
-    // Create user
+    // Criar usuário
     function create() {
         $query = "INSERT INTO " . $this->table_name . " 
-                  (name, phone, email, address, number, complement, city, password, is_admin) 
-                  VALUES (:name, :phone, :email, :address, :number, :complement, :city, :password, :is_admin)";
+                  (nome, telefone, email, endereco, numero, complemento, cidade, senha, eh_admin) 
+                  VALUES (:nome, :telefone, :email, :endereco, :numero, :complemento, :cidade, :senha, :eh_admin)";
 
         $stmt = $this->conn->prepare($query);
 
-        // Sanitize
-        $this->name = htmlspecialchars(strip_tags($this->name));
-        $this->phone = htmlspecialchars(strip_tags($this->phone));
+        // Sanitizar
+        $this->nome = htmlspecialchars(strip_tags($this->nome));
+        $this->telefone = htmlspecialchars(strip_tags($this->telefone));
         $this->email = htmlspecialchars(strip_tags($this->email));
-        $this->address = htmlspecialchars(strip_tags($this->address));
-        $this->number = htmlspecialchars(strip_tags($this->number));
-        $this->complement = htmlspecialchars(strip_tags($this->complement));
-        $this->city = htmlspecialchars(strip_tags($this->city));
-        $this->password = password_hash($this->password, PASSWORD_DEFAULT);
-        $this->is_admin = $this->is_admin ?? false;
+        $this->endereco = htmlspecialchars(strip_tags($this->endereco));
+        $this->numero = htmlspecialchars(strip_tags($this->numero));
+        $this->complemento = htmlspecialchars(strip_tags($this->complemento));
+        $this->cidade = htmlspecialchars(strip_tags($this->cidade));
+        $this->senha = password_hash($this->senha, PASSWORD_DEFAULT);
+        $this->eh_admin = $this->eh_admin ?? false;
 
         // Bind values
-        $stmt->bindParam(":name", $this->name);
-        $stmt->bindParam(":phone", $this->phone);
+        $stmt->bindParam(":nome", $this->nome);
+        $stmt->bindParam(":telefone", $this->telefone);
         $stmt->bindParam(":email", $this->email);
-        $stmt->bindParam(":address", $this->address);
-        $stmt->bindParam(":number", $this->number);
-        $stmt->bindParam(":complement", $this->complement);
-        $stmt->bindParam(":city", $this->city);
-        $stmt->bindParam(":password", $this->password);
-        $stmt->bindParam(":is_admin", $this->is_admin, PDO::PARAM_BOOL);
+        $stmt->bindParam(":endereco", $this->endereco);
+        $stmt->bindParam(":numero", $this->numero);
+        $stmt->bindParam(":complemento", $this->complemento);
+        $stmt->bindParam(":cidade", $this->cidade);
+        $stmt->bindParam(":senha", $this->senha);
+        $stmt->bindParam(":eh_admin", $this->eh_admin, PDO::PARAM_BOOL);
 
         if($stmt->execute()) {
             $this->id = $this->conn->lastInsertId();
@@ -57,30 +57,30 @@ class User {
         return false;
     }
 
-    // Login user
-    function login($phone, $password) {
-        $query = "SELECT id, name, phone, email, address, number, complement, city, password, is_admin, created_at 
+    // Login usuário
+    function login($telefone, $senha) {
+        $query = "SELECT id, nome, telefone, email, endereco, numero, complemento, cidade, senha, eh_admin, criado_em 
                   FROM " . $this->table_name . " 
-                  WHERE phone = :phone";
+                  WHERE telefone = :telefone";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":phone", $phone);
+        $stmt->bindParam(":telefone", $telefone);
         $stmt->execute();
 
         if($stmt->rowCount() > 0) {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            if(password_verify($password, $row['password'])) {
+            if(password_verify($senha, $row['senha'])) {
                 $this->id = $row['id'];
-                $this->name = $row['name'];
-                $this->phone = $row['phone'];
+                $this->nome = $row['nome'];
+                $this->telefone = $row['telefone'];
                 $this->email = $row['email'];
-                $this->address = $row['address'];
-                $this->number = $row['number'];
-                $this->complement = $row['complement'];
-                $this->city = $row['city'];
-                $this->is_admin = $row['is_admin'];
-                $this->created_at = $row['created_at'];
+                $this->endereco = $row['endereco'];
+                $this->numero = $row['numero'];
+                $this->complemento = $row['complemento'];
+                $this->cidade = $row['cidade'];
+                $this->eh_admin = $row['eh_admin'];
+                $this->criado_em = $row['criado_em'];
                 return true;
             }
         }
@@ -88,22 +88,22 @@ class User {
         return false;
     }
 
-    // Check if user exists
+    // Verificar se usuário existe
     function userExists() {
         $query = "SELECT id FROM " . $this->table_name . " 
-                  WHERE phone = :phone OR email = :email";
+                  WHERE telefone = :telefone OR email = :email";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":phone", $this->phone);
+        $stmt->bindParam(":telefone", $this->telefone);
         $stmt->bindParam(":email", $this->email);
         $stmt->execute();
 
         return $stmt->rowCount() > 0;
     }
 
-    // Get user by ID
+    // Obter usuário por ID
     function readOne() {
-        $query = "SELECT id, name, phone, email, address, number, complement, city, is_admin, created_at 
+        $query = "SELECT id, nome, telefone, email, endereco, numero, complemento, cidade, eh_admin, criado_em 
                   FROM " . $this->table_name . " 
                   WHERE id = :id";
 
@@ -114,28 +114,28 @@ class User {
         if($stmt->rowCount() > 0) {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            $this->name = $row['name'];
-            $this->phone = $row['phone'];
+            $this->nome = $row['nome'];
+            $this->telefone = $row['telefone'];
             $this->email = $row['email'];
-            $this->address = $row['address'];
-            $this->number = $row['number'];
-            $this->complement = $row['complement'];
-            $this->city = $row['city'];
-            $this->is_admin = $row['is_admin'];
-            $this->created_at = $row['created_at'];
+            $this->endereco = $row['endereco'];
+            $this->numero = $row['numero'];
+            $this->complemento = $row['complemento'];
+            $this->cidade = $row['cidade'];
+            $this->eh_admin = $row['eh_admin'];
+            $this->criado_em = $row['criado_em'];
             return true;
         }
 
         return false;
     }
 
-    // Get user by phone for password recovery
-    function getByPhone($phone) {
-        $query = "SELECT id, name, phone, email FROM " . $this->table_name . " 
-                  WHERE phone = :phone";
+    // Obter usuário por telefone para recuperação de senha
+    function getByPhone($telefone) {
+        $query = "SELECT id, nome, telefone, email FROM " . $this->table_name . " 
+                  WHERE telefone = :telefone";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":phone", $phone);
+        $stmt->bindParam(":telefone", $telefone);
         $stmt->execute();
 
         if($stmt->rowCount() > 0) {

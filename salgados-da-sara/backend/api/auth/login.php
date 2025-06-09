@@ -17,19 +17,19 @@ if(!empty($data->phone) && !empty($data->password)) {
         
         // Create response array
         $response = array(
-            "success" => true,
-            "message" => "Login realizado com sucesso!",
-            "user" => array(
+            "sucesso" => true,
+            "mensagem" => "Login realizado com sucesso!",
+            "usuario" => array(
                 "id" => $user->id,
-                "name" => $user->name,
-                "phone" => $user->phone,
+                "nome" => $user->nome,
+                "telefone" => $user->telefone,
                 "email" => $user->email,
-                "address" => $user->address,
-                "number" => $user->number,
-                "complement" => $user->complement,
-                "city" => $user->city,
-                "is_admin" => $user->is_admin,
-                "created_at" => $user->created_at
+                "endereco" => $user->endereco,
+                "numero" => $user->numero,
+                "complemento" => $user->complemento,
+                "cidade" => $user->cidade,
+                "eh_admin" => $user->eh_admin,
+                "criado_em" => $user->criado_em
             )
         );
         
@@ -38,15 +38,15 @@ if(!empty($data->phone) && !empty($data->password)) {
     } else {
         http_response_code(401);
         echo json_encode(array(
-            "success" => false,
-            "message" => "Telefone ou senha incorretos"
+            "sucesso" => false,
+            "mensagem" => "Telefone ou senha incorretos"
         ));
     }
 } else {
     http_response_code(400);
     echo json_encode(array(
-        "success" => false,
-        "message" => "Dados incompletos"
+        "sucesso" => false,
+        "mensagem" => "Dados incompletos"
     ));
 }
 ?>

@@ -23,10 +23,10 @@ class Database {
             
         } catch(PDOException $exception) {
             // Log do erro para debug
-            error_log("Database connection error: " . $exception->getMessage());
+            error_log("Erro de conexão com banco de dados: " . $exception->getMessage());
             echo json_encode([
-                'success' => false,
-                'message' => 'Erro de conexão com banco de dados: ' . $exception->getMessage()
+                'sucesso' => false,
+                'mensagem' => 'Erro de conexão com banco de dados: ' . $exception->getMessage()
             ]);
             exit();
         }

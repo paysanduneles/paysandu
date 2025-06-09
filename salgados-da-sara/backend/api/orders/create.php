@@ -13,36 +13,36 @@ $data = json_decode(file_get_contents("php://input"));
 
 if(!empty($data->user_id) && !empty($data->items) && !empty($data->total)) {
     
-    $order->user_id = $data->user_id;
-    $order->customer_data = $data->customer_data;
-    $order->items = $data->items;
+    $order->usuario_id = $data->user_id;
+    $order->dados_cliente = $data->customer_data;
+    $order->itens = $data->items;
     $order->subtotal = $data->subtotal;
-    $order->delivery_fee = $data->delivery_fee ?? 0;
+    $order->taxa_entrega = $data->delivery_fee ?? 0;
     $order->total = $data->total;
-    $order->is_delivery = $data->is_delivery ?? false;
-    $order->payment_method = $data->payment_method ?? 'cash';
-    $order->status = 'pending';
+    $order->eh_entrega = $data->is_delivery ?? false;
+    $order->metodo_pagamento = $data->payment_method ?? 'dinheiro';
+    $order->status = 'pendente';
 
     if($order->create()) {
         http_response_code(201);
         echo json_encode(array(
-            "success" => true,
-            "message" => "Pedido criado com sucesso!",
-            "order_id" => $order->id,
-            "order_number" => $order->order_number
+            "sucesso" => true,
+            "mensagem" => "Pedido criado com sucesso!",
+            "id_pedido" => $order->id,
+            "numero_pedido" => $order->numero_pedido
         ));
     } else {
         http_response_code(500);
         echo json_encode(array(
-            "success" => false,
-            "message" => "Erro ao criar pedido"
+            "sucesso" => false,
+            "mensagem" => "Erro ao criar pedido"
         ));
     }
 } else {
     http_response_code(400);
     echo json_encode(array(
-        "success" => false,
-        "message" => "Dados incompletos"
+        "sucesso" => false,
+        "mensagem" => "Dados incompletos"
     ));
 }
 ?>

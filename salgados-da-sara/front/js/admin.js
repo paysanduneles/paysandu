@@ -18,9 +18,9 @@ const Admin = {
         try {
             const response = await API.orders.getAll();
             
-            if (response.success) {
-                const orders = response.data;
-                const sortedOrders = orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            if (response.sucesso) {
+                const orders = response.dados;
+                const sortedOrders = orders.sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
 
                 if (sortedOrders.length === 0) {
                     ordersContainer.innerHTML = `
@@ -35,7 +35,7 @@ const Admin = {
                 ordersContainer.innerHTML = sortedOrders.map(order => `
                     <div class="admin-order ${order.status}">
                         <div class="order-header">
-                            <div class="order-id">${order.order_number}</div>
+                            <div class="order-id">${order.numero_pedido}</div>
                             <div class="order-status ${order.status}">
                                 ${Admin.getStatusLabel(order.status)}
                             </div>
@@ -45,23 +45,23 @@ const Admin = {
                             <div class="order-customer">
                                 <div class="customer-info">
                                     <strong>Cliente:</strong>
-                                    ${order.customer_data.name}
+                                    ${order.dados_cliente.name}
                                 </div>
                                 <div class="customer-info">
                                     <strong>Telefone:</strong>
-                                    ${order.customer_data.phone}
+                                    ${order.dados_cliente.phone}
                                 </div>
                                 <div class="customer-info">
                                     <strong>Entrega:</strong>
-                                    ${order.is_delivery ? 'Delivery' : 'Retirada'}
+                                    ${order.eh_entrega ? 'Delivery' : 'Retirada'}
                                 </div>
                                 <div class="customer-info">
                                     <strong>Pagamento:</strong>
-                                    ${Admin.getPaymentLabel(order.payment_method)}
+                                    ${Admin.getPaymentLabel(order.metodo_pagamento)}
                                 </div>
                                 <div class="customer-info">
                                     <strong>Data:</strong>
-                                    ${Utils.formatDate(order.created_at)}
+                                    ${Utils.formatDate(order.criado_em)}
                                 </div>
                                 <div class="customer-info">
                                     <strong>Total:</strong>
@@ -69,21 +69,21 @@ const Admin = {
                                 </div>
                             </div>
                             
-                            ${order.is_delivery ? `
+                            ${order.eh_entrega ? `
                                 <div class="customer-info">
                                     <strong>Endereço:</strong>
-                                    ${order.customer_data.address}, ${order.customer_data.number}
-                                    ${order.customer_data.complement ? `, ${order.customer_data.complement}` : ''}
-                                    - ${order.customer_data.city}
+                                    ${order.dados_cliente.address}, ${order.dados_cliente.number}
+                                    ${order.dados_cliente.complement ? `, ${order.dados_cliente.complement}` : ''}
+                                    - ${order.dados_cliente.city}
                                 </div>
                             ` : ''}
                             
                             <div class="order-items">
                                 <strong>Itens:</strong>
-                                ${order.items.map(item => `
+                                ${order.itens.map(item => `
                                     <div class="order-item">
                                         <span>
-                                            ${item.quantity}x ${item.name}
+                                            ${item.quantity}x ${item.nome}
                                             (${Utils.getQuantityLabel(item.quantityType, item.unitCount)})
                                         </span>
                                         <span>${Utils.formatCurrency(item.totalPrice)}</span>
@@ -93,8 +93,8 @@ const Admin = {
                         </div>
                         
                         <div class="order-actions">
-                            ${order.status === 'pending' ? `
-                                <button class="btn btn-success" onclick="Admin.updateOrderStatus('${order.id}', 'confirmed')">
+                            ${order.status === 'pendente' ? `
+                                <button class="btn btn-success" onclick="Admin.updateOrderStatus('${order.id}', 'confirmado')">
                                     Confirmar
                                 </button>
                                 <button class="btn btn-danger" onclick="Admin.showRejectModal('${order.id}')">
@@ -102,14 +102,14 @@ const Admin = {
                                 </button>
                             ` : ''}
                             
-                            ${order.status === 'confirmed' ? `
-                                <button class="btn btn-primary" onclick="Admin.updateOrderStatus('${order.id}', 'ready')">
+                            ${order.status === 'confirmado' ? `
+                                <button class="btn btn-primary" onclick="Admin.updateOrderStatus('${order.id}', 'pronto')">
                                     Pronto
                                 </button>
                             ` : ''}
                             
-                            ${order.status === 'ready' ? `
-                                <button class="btn btn-success" onclick="Admin.updateOrderStatus('${order.id}', 'delivered')">
+                            ${order.status === 'pronto' ? `
+                                <button class="btn btn-success" onclick="Admin.updateOrderStatus('${order.id}', 'entregue')">
                                     Entregue
                                 </button>
                             ` : ''}
@@ -117,7 +117,7 @@ const Admin = {
                     </div>
                 `).join('');
             } else {
-                throw new Error(response.message);
+                throw new Error(response.mensagem);
             }
         } catch (error) {
             console.error('Erro ao carregar pedidos:', error);
@@ -133,11 +133,11 @@ const Admin = {
     // Get status label
     getStatusLabel: (status) => {
         const labels = {
-            'pending': 'Aguardando Confirmação',
-            'confirmed': 'Em Preparação',
-            'ready': 'Pronto',
-            'delivered': 'Entregue',
-            'rejected': 'Recusado'
+            'pendente': 'Aguardando Confirmação',
+            'confirmado': 'Em Preparação',
+            'pronto': 'Pronto',
+            'entregue': 'Entregue',
+            'rejeitado': 'Recusado'
         };
         return labels[status] || status;
     },
@@ -145,7 +145,7 @@ const Admin = {
     // Get payment label
     getPaymentLabel: (method) => {
         const labels = {
-            'cash': 'Dinheiro',
+            'dinheiro': 'Dinheiro',
             'card': 'Cartão',
             'pix': 'PIX'
         };
@@ -157,11 +157,11 @@ const Admin = {
         try {
             const response = await API.orders.updateStatus(orderId, newStatus);
             
-            if (response.success) {
+            if (response.sucesso) {
                 Admin.loadOrders();
                 Utils.showMessage(`Pedido atualizado para: ${Admin.getStatusLabel(newStatus)}`);
             } else {
-                throw new Error(response.message);
+                throw new Error(response.mensagem);
             }
         } catch (error) {
             Utils.showMessage('Erro ao atualizar pedido: ' + error.message, 'error');
@@ -179,13 +179,13 @@ const Admin = {
     // Reject order
     rejectOrder: async (orderId, reason) => {
         try {
-            const response = await API.orders.updateStatus(orderId, 'rejected', null, reason);
+            const response = await API.orders.updateStatus(orderId, 'rejeitado', null, reason);
             
-            if (response.success) {
+            if (response.sucesso) {
                 Admin.loadOrders();
                 Utils.showMessage('Pedido foi recusado.');
             } else {
-                throw new Error(response.message);
+                throw new Error(response.mensagem);
             }
         } catch (error) {
             Utils.showMessage('Erro ao recusar pedido: ' + error.message, 'error');
@@ -200,21 +200,21 @@ const Admin = {
         try {
             const response = await API.products.getAll();
             
-            if (response.success) {
-                const products = response.data;
+            if (response.sucesso) {
+                const products = response.dados;
 
                 productsContainer.innerHTML = products.map(item => `
                     <div class="admin-product">
                         <div class="product-info">
-                            <h4>${item.name}</h4>
+                            <h4>${item.nome}</h4>
                             <div class="product-price">
-                                ${item.is_portioned ? Utils.formatCurrency(item.price) : Utils.formatCurrency(item.price) + ' / cento'}
+                                ${item.eh_porcionado ? Utils.formatCurrency(item.preco) : Utils.formatCurrency(item.preco) + ' / cento'}
                             </div>
-                            <div class="product-category">${Menu.getCategoryName(item.category)}</div>
-                            ${item.description ? `<p>${item.description}</p>` : ''}
+                            <div class="product-category">${Menu.getCategoryName(item.categoria)}</div>
+                            ${item.descricao ? `<p>${item.descricao}</p>` : ''}
                         </div>
                         <div class="product-actions">
-                            ${item.is_custom ? `
+                            ${item.eh_personalizado ? `
                                 <button class="btn btn-secondary" onclick="Admin.editProduct(${item.id})">Editar</button>
                                 <button class="btn btn-danger" onclick="Admin.deleteProduct(${item.id})">Excluir</button>
                             ` : `
@@ -224,7 +224,7 @@ const Admin = {
                     </div>
                 `).join('');
             } else {
-                throw new Error(response.message);
+                throw new Error(response.mensagem);
             }
         } catch (error) {
             console.error('Erro ao carregar produtos:', error);
@@ -302,12 +302,12 @@ const Admin = {
             try {
                 const response = await API.products.create(newProduct);
                 
-                if (response.success) {
+                if (response.sucesso) {
                     Admin.loadProducts();
                     Utils.showMessage('Produto adicionado com sucesso!');
                     modal.remove();
                 } else {
-                    throw new Error(response.message);
+                    throw new Error(response.mensagem);
                 }
             } catch (error) {
                 Utils.showMessage('Erro ao adicionar produto: ' + error.message, 'error');
@@ -327,11 +327,11 @@ const Admin = {
             try {
                 const response = await API.products.delete(productId);
                 
-                if (response.success) {
+                if (response.sucesso) {
                     Admin.loadProducts();
                     Utils.showMessage('Produto excluído com sucesso!');
                 } else {
-                    throw new Error(response.message);
+                    throw new Error(response.mensagem);
                 }
             } catch (error) {
                 Utils.showMessage('Erro ao excluir produto: ' + error.message, 'error');
@@ -347,17 +347,17 @@ const Admin = {
         try {
             const response = await API.admin.getAdmins();
             
-            if (response.success) {
-                const admins = response.data;
+            if (response.sucesso) {
+                const admins = response.dados;
 
                 adminsContainer.innerHTML = admins.map(admin => `
                     <div class="admin-admin">
                         <div class="admin-info">
-                            <h4>${admin.username}</h4>
-                            <div class="admin-role">${admin.role}</div>
+                            <h4>${admin.nome_usuario}</h4>
+                            <div class="admin-role">${admin.funcao}</div>
                         </div>
                         <div class="admin-actions">
-                            ${admin.username !== 'sara' ? `
+                            ${admin.nome_usuario !== 'sara' ? `
                                 <button class="btn btn-danger" onclick="Admin.deleteAdmin('${admin.id}')">Excluir</button>
                             ` : `
                                 <small>Administrador principal</small>
@@ -366,7 +366,7 @@ const Admin = {
                     </div>
                 `).join('');
             } else {
-                throw new Error(response.message);
+                throw new Error(response.mensagem);
             }
         } catch (error) {
             console.error('Erro ao carregar administradores:', error);
@@ -424,12 +424,12 @@ const Admin = {
             try {
                 const response = await API.admin.createAdmin(newAdmin);
                 
-                if (response.success) {
+                if (response.sucesso) {
                     Admin.loadAdmins();
                     Utils.showMessage('Administrador adicionado com sucesso!');
                     modal.remove();
                 } else {
-                    throw new Error(response.message);
+                    throw new Error(response.mensagem);
                 }
             } catch (error) {
                 Utils.showMessage('Erro ao adicionar administrador: ' + error.message, 'error');
@@ -443,11 +443,11 @@ const Admin = {
             try {
                 const response = await API.admin.deleteAdmin(adminId);
                 
-                if (response.success) {
+                if (response.sucesso) {
                     Admin.loadAdmins();
                     Utils.showMessage('Administrador excluído com sucesso!');
                 } else {
-                    throw new Error(response.message);
+                    throw new Error(response.mensagem);
                 }
             } catch (error) {
                 Utils.showMessage('Erro ao excluir administrador: ' + error.message, 'error');
@@ -461,9 +461,9 @@ const Admin = {
         if (!deliveryPriceInput) return;
 
         try {
-            const response = await API.config.get('delivery_fee');
-            if (response.success && response.data.delivery_fee) {
-                deliveryPriceInput.value = response.data.delivery_fee;
+            const response = await API.config.get('taxa_entrega');
+            if (response.sucesso && response.dados.taxa_entrega) {
+                deliveryPriceInput.value = response.dados.taxa_entrega;
             }
         } catch (error) {
             console.error('Erro ao carregar configurações:', error);
@@ -476,15 +476,15 @@ const Admin = {
         const newPrice = parseFloat(deliveryPriceInput.value) || 0;
 
         try {
-            const response = await API.config.set('delivery_fee', newPrice.toString());
+            const response = await API.config.set('taxa_entrega', newPrice.toString());
             
-            if (response.success) {
+            if (response.sucesso) {
                 Utils.showMessage('Valor da entrega atualizado com sucesso!');
                 // Update cart delivery fee
-                Cart.deliveryFee = newPrice;
+                Cart.taxaEntrega = newPrice;
                 Cart.updateCartSummary();
             } else {
-                throw new Error(response.message);
+                throw new Error(response.mensagem);
             }
         } catch (error) {
             Utils.showMessage('Erro ao atualizar valor da entrega: ' + error.message, 'error');

@@ -18,11 +18,11 @@ const Menu = {
         try {
             const response = await API.products.getAll();
             
-            if (response.success) {
-                Menu.items = response.data;
+            if (response.sucesso) {
+                Menu.items = response.dados;
                 Menu.renderMenuItems();
             } else {
-                throw new Error(response.message);
+                throw new Error(response.mensagem);
             }
         } catch (error) {
             console.error('Erro ao carregar produtos:', error);
@@ -44,7 +44,7 @@ const Menu = {
         // Filter items
         const filteredItems = Menu.currentFilter === 'todos' 
             ? Menu.items 
-            : Menu.items.filter(item => item.category === Menu.currentFilter);
+            : Menu.items.filter(item => item.categoria === Menu.currentFilter);
 
         if (filteredItems.length === 0) {
             menuItemsEl.innerHTML = `
@@ -58,18 +58,18 @@ const Menu = {
 
         menuItemsEl.innerHTML = filteredItems.map(item => `
             <div class="menu-item" onclick="Menu.selectItem(${item.id})">
-                <h3>${item.name}</h3>
+                <h3>${item.nome}</h3>
                 <div class="price">
-                    ${item.is_portioned ? Utils.formatCurrency(item.price) : Utils.formatCurrency(item.price) + ' / cento'}
+                    ${item.eh_porcionado ? Utils.formatCurrency(item.preco) : Utils.formatCurrency(item.preco) + ' / cento'}
                 </div>
-                <div class="category">${Menu.getCategoryName(item.category)}</div>
-                ${item.description ? `<div class="description">${item.description}</div>` : ''}
+                <div class="category">${Menu.getCategoryName(item.categoria)}</div>
+                ${item.descricao ? `<div class="description">${item.descricao}</div>` : ''}
             </div>
         `).join('');
     },
 
     // Get category display name
-    getCategoryName: (category) => {
+    getCategoryName: (categoria) => {
         const names = {
             'salgados': 'Salgados Fritos',
             'sortidos': 'Sortidos',
@@ -77,12 +77,12 @@ const Menu = {
             'especiais': 'Especiais',
             'opcionais': 'Opcionais'
         };
-        return names[category] || category;
+        return names[categoria] || categoria;
     },
 
     // Filter menu
-    filterMenu: (category) => {
-        Menu.currentFilter = category;
+    filterMenu: (categoria) => {
+        Menu.currentFilter = categoria;
         
         // Update active button
         document.querySelectorAll('.category-btn').forEach(btn => {
@@ -105,15 +105,15 @@ const Menu = {
         Menu.currentItem = Menu.items.find(item => item.id === itemId);
         
         if (Menu.currentItem) {
-            if (Menu.currentItem.is_portioned) {
+            if (Menu.currentItem.eh_porcionado) {
                 // For portioned items, add directly to cart
                 Cart.addItem({
                     ...Menu.currentItem,
                     quantityType: 'porção',
                     unitCount: 1,
-                    totalPrice: Menu.currentItem.price
+                    totalPrice: Menu.currentItem.preco
                 });
-                Utils.showMessage(`${Menu.currentItem.name} adicionado ao carrinho!`);
+                Utils.showMessage(`${Menu.currentItem.nome} adicionado ao carrinho!`);
             } else {
                 Menu.showQuantityModal();
             }
@@ -133,12 +133,12 @@ const Menu = {
         const unitCount = document.getElementById('unit-count');
 
         // Set item name
-        itemName.textContent = Menu.currentItem.name;
+        itemName.textContent = Menu.currentItem.nome;
 
         // Set prices
-        priceCento.textContent = Utils.formatCurrency(Menu.currentItem.price);
-        priceMeioCento.textContent = Utils.formatCurrency(Menu.currentItem.price / 2);
-        priceUnidade.textContent = Utils.formatCurrency(Menu.currentItem.price / 100);
+        priceCento.textContent = Utils.formatCurrency(Menu.currentItem.preco);
+        priceMeioCento.textContent = Utils.formatCurrency(Menu.currentItem.preco / 2);
+        priceUnidade.textContent = Utils.formatCurrency(Menu.currentItem.preco / 100);
 
         // Reset form
         document.querySelector('input[name="quantity-type"][value="cento"]').checked = true;
@@ -174,8 +174,8 @@ const Menu = {
 };
 
 // Global functions
-function filterMenu(category) {
-    Menu.currentFilter = category;
+function filterMenu(categoria) {
+    Menu.currentFilter = categoria;
     
     // Update active button
     document.querySelectorAll('.category-btn').forEach(btn => {
@@ -184,8 +184,8 @@ function filterMenu(category) {
     
     // Find and activate the clicked button
     const activeBtn = Array.from(document.querySelectorAll('.category-btn')).find(btn => 
-        btn.textContent.toLowerCase().includes(category) || 
-        (category === 'todos' && btn.textContent === 'TODOS')
+        btn.textContent.toLowerCase().includes(categoria) || 
+        (categoria === 'todos' && btn.textContent === 'TODOS')
     );
     if (activeBtn) {
         activeBtn.classList.add('active');
@@ -209,14 +209,14 @@ function addToCart() {
         ...Menu.currentItem,
         quantityType: quantityType,
         unitCount: quantityType === 'unidade' ? unitCount : 1,
-        totalPrice: Utils.calculateItemPrice(Menu.currentItem.price, quantityType, unitCount)
+        totalPrice: Utils.calculateItemPrice(Menu.currentItem.preco, quantityType, unitCount)
     };
 
     Cart.addItem(cartItem);
     closeModal();
     
     const quantityLabel = Utils.getQuantityLabel(quantityType, unitCount);
-    Utils.showMessage(`${Menu.currentItem.name} (${quantityLabel}) adicionado ao carrinho!`);
+    Utils.showMessage(`${Menu.currentItem.nome} (${quantityLabel}) adicionado ao carrinho!`);
 }
 
 // Initialize menu when DOM is loaded

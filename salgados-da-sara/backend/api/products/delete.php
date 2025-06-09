@@ -18,21 +18,21 @@ if(!empty($data->id)) {
     if($product->delete()) {
         http_response_code(200);
         echo json_encode(array(
-            "success" => true,
-            "message" => "Produto excluído com sucesso!"
+            "sucesso" => true,
+            "mensagem" => "Produto excluído com sucesso!"
         ));
     } else {
         http_response_code(500);
         echo json_encode(array(
-            "success" => false,
-            "message" => "Erro ao excluir produto ou produto não é customizado"
+            "sucesso" => false,
+            "mensagem" => "Erro ao excluir produto ou produto não é personalizado"
         ));
     }
 } else {
     http_response_code(400);
     echo json_encode(array(
-        "success" => false,
-        "message" => "ID do produto é obrigatório"
+        "sucesso" => false,
+        "mensagem" => "ID do produto é obrigatório"
     ));
 }
 ?>

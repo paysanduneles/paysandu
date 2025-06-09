@@ -1,71 +1,71 @@
 <?php
 class Config {
     private $conn;
-    private $table_name = "app_config";
+    private $table_name = "configuracoes_app";
 
     public $id;
-    public $config_key;
-    public $config_value;
-    public $updated_at;
+    public $chave_config;
+    public $valor_config;
+    public $atualizado_em;
 
     public function __construct($db) {
         $this->conn = $db;
     }
 
-    // Get config value
-    function getValue($key) {
-        $query = "SELECT config_value FROM " . $this->table_name . " 
-                  WHERE config_key = :key";
+    // Obter valor de configuração
+    function getValue($chave) {
+        $query = "SELECT valor_config FROM " . $this->table_name . " 
+                  WHERE chave_config = :chave";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":key", $key);
+        $stmt->bindParam(":chave", $chave);
         $stmt->execute();
 
         if($stmt->rowCount() > 0) {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $row['config_value'];
+            return $row['valor_config'];
         }
 
         return null;
     }
 
-    // Set config value
-    function setValue($key, $value) {
-        // Check if key exists
+    // Definir valor de configuração
+    function setValue($chave, $valor) {
+        // Verificar se a chave existe
         $check_query = "SELECT id FROM " . $this->table_name . " 
-                        WHERE config_key = :key";
+                        WHERE chave_config = :chave";
         $check_stmt = $this->conn->prepare($check_query);
-        $check_stmt->bindParam(":key", $key);
+        $check_stmt->bindParam(":chave", $chave);
         $check_stmt->execute();
 
         if($check_stmt->rowCount() > 0) {
-            // Update existing
+            // Atualizar existente
             $query = "UPDATE " . $this->table_name . " 
-                      SET config_value = :value, updated_at = CURRENT_TIMESTAMP 
-                      WHERE config_key = :key";
+                      SET valor_config = :valor, atualizado_em = CURRENT_TIMESTAMP 
+                      WHERE chave_config = :chave";
         } else {
-            // Insert new
+            // Inserir novo
             $query = "INSERT INTO " . $this->table_name . " 
-                      (config_key, config_value) 
-                      VALUES (:key, :value)";
+                      (chave_config, valor_config) 
+                      VALUES (:chave, :valor)";
         }
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":key", $key);
-        $stmt->bindParam(":value", $value);
+        $stmt->bindParam(":chave", $chave);
+        $stmt->bindParam(":valor", $valor);
 
         return $stmt->execute();
     }
 
-    // Get all config
+    // Obter todas as configurações
     function getAll() {
-        $query = "SELECT config_key, config_value FROM " . $this->table_name;
+        $query = "SELECT chave_config, valor_config FROM " . $this->table_name;
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
 
         $config = [];
         while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $config[$row['config_key']] = $row['config_value'];
+            $config[$row['chave_config']] = $row['valor_config'];
         }
 
         return $config;

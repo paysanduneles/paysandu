@@ -1,66 +1,66 @@
 <?php
 class Order {
     private $conn;
-    private $table_name = "orders";
+    private $table_name = "pedidos";
 
     public $id;
-    public $order_number;
-    public $user_id;
-    public $customer_data;
-    public $items;
+    public $numero_pedido;
+    public $usuario_id;
+    public $dados_cliente;
+    public $itens;
     public $subtotal;
-    public $delivery_fee;
+    public $taxa_entrega;
     public $total;
-    public $is_delivery;
-    public $payment_method;
+    public $eh_entrega;
+    public $metodo_pagamento;
     public $status;
-    public $rejection_reason;
-    public $created_at;
+    public $motivo_rejeicao;
+    public $criado_em;
 
     public function __construct($db) {
         $this->conn = $db;
     }
 
-    // Create order
+    // Criar pedido
     function create() {
         $query = "INSERT INTO " . $this->table_name . " 
-                  (order_number, user_id, customer_data, items, subtotal, delivery_fee, total, is_delivery, payment_method, status) 
-                  VALUES (:order_number, :user_id, :customer_data, :items, :subtotal, :delivery_fee, :total, :is_delivery, :payment_method, :status)";
+                  (numero_pedido, usuario_id, dados_cliente, itens, subtotal, taxa_entrega, total, eh_entrega, metodo_pagamento, status) 
+                  VALUES (:numero_pedido, :usuario_id, :dados_cliente, :itens, :subtotal, :taxa_entrega, :total, :eh_entrega, :metodo_pagamento, :status)";
 
         $stmt = $this->conn->prepare($query);
 
-        // Generate order number if not provided
-        if(empty($this->order_number)) {
-            $this->order_number = $this->generateOrderNumber();
+        // Gerar número do pedido se não fornecido
+        if(empty($this->numero_pedido)) {
+            $this->numero_pedido = $this->generateOrderNumber();
         }
 
-        // Sanitize
-        $this->order_number = htmlspecialchars(strip_tags($this->order_number));
-        $this->payment_method = htmlspecialchars(strip_tags($this->payment_method));
-        $this->status = $this->status ?? 'pending';
-        $this->is_delivery = $this->is_delivery ?? false;
+        // Sanitizar
+        $this->numero_pedido = htmlspecialchars(strip_tags($this->numero_pedido));
+        $this->metodo_pagamento = htmlspecialchars(strip_tags($this->metodo_pagamento));
+        $this->status = $this->status ?? 'pendente';
+        $this->eh_entrega = $this->eh_entrega ?? false;
 
-        // Convert arrays to JSON
-        $customer_data_json = json_encode($this->customer_data);
-        $items_json = json_encode($this->items);
+        // Converter arrays para JSON
+        $dados_cliente_json = json_encode($this->dados_cliente);
+        $itens_json = json_encode($this->itens);
 
         // Bind values
-        $stmt->bindParam(":order_number", $this->order_number);
-        $stmt->bindParam(":user_id", $this->user_id);
-        $stmt->bindParam(":customer_data", $customer_data_json);
-        $stmt->bindParam(":items", $items_json);
+        $stmt->bindParam(":numero_pedido", $this->numero_pedido);
+        $stmt->bindParam(":usuario_id", $this->usuario_id);
+        $stmt->bindParam(":dados_cliente", $dados_cliente_json);
+        $stmt->bindParam(":itens", $itens_json);
         $stmt->bindParam(":subtotal", $this->subtotal);
-        $stmt->bindParam(":delivery_fee", $this->delivery_fee);
+        $stmt->bindParam(":taxa_entrega", $this->taxa_entrega);
         $stmt->bindParam(":total", $this->total);
-        $stmt->bindParam(":is_delivery", $this->is_delivery, PDO::PARAM_BOOL);
-        $stmt->bindParam(":payment_method", $this->payment_method);
+        $stmt->bindParam(":eh_entrega", $this->eh_entrega, PDO::PARAM_BOOL);
+        $stmt->bindParam(":metodo_pagamento", $this->metodo_pagamento);
         $stmt->bindParam(":status", $this->status);
 
         if($stmt->execute()) {
             $this->id = $this->conn->lastInsertId();
             
-            // Create status history entry
-            $this->createStatusHistory('pending', 'Pedido recebido - Aguardando confirmação');
+            // Criar entrada no histórico de status
+            $this->createStatusHistory('pendente', 'Pedido recebido - Aguardando confirmação');
             
             return true;
         }
@@ -68,12 +68,12 @@ class Order {
         return false;
     }
 
-    // Read all orders
+    // Ler todos os pedidos
     function readAll() {
-        $query = "SELECT o.*, u.name as user_name 
-                  FROM " . $this->table_name . " o
-                  LEFT JOIN users u ON o.user_id = u.id
-                  ORDER BY o.created_at DESC";
+        $query = "SELECT p.*, u.nome as nome_usuario 
+                  FROM " . $this->table_name . " p
+                  LEFT JOIN usuarios u ON p.usuario_id = u.id
+                  ORDER BY p.criado_em DESC";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
@@ -81,20 +81,20 @@ class Order {
         return $stmt;
     }
 
-    // Read orders by user
-    function readByUser($user_id) {
+    // Ler pedidos por usuário
+    function readByUser($usuario_id) {
         $query = "SELECT * FROM " . $this->table_name . " 
-                  WHERE user_id = :user_id 
-                  ORDER BY created_at DESC";
+                  WHERE usuario_id = :usuario_id 
+                  ORDER BY criado_em DESC";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":user_id", $user_id);
+        $stmt->bindParam(":usuario_id", $usuario_id);
         $stmt->execute();
 
         return $stmt;
     }
 
-    // Read one order
+    // Ler um pedido
     function readOne() {
         $query = "SELECT * FROM " . $this->table_name . " 
                   WHERE id = :id";
@@ -106,54 +106,54 @@ class Order {
         if($stmt->rowCount() > 0) {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            $this->order_number = $row['order_number'];
-            $this->user_id = $row['user_id'];
-            $this->customer_data = json_decode($row['customer_data'], true);
-            $this->items = json_decode($row['items'], true);
+            $this->numero_pedido = $row['numero_pedido'];
+            $this->usuario_id = $row['usuario_id'];
+            $this->dados_cliente = json_decode($row['dados_cliente'], true);
+            $this->itens = json_decode($row['itens'], true);
             $this->subtotal = $row['subtotal'];
-            $this->delivery_fee = $row['delivery_fee'];
+            $this->taxa_entrega = $row['taxa_entrega'];
             $this->total = $row['total'];
-            $this->is_delivery = $row['is_delivery'];
-            $this->payment_method = $row['payment_method'];
+            $this->eh_entrega = $row['eh_entrega'];
+            $this->metodo_pagamento = $row['metodo_pagamento'];
             $this->status = $row['status'];
-            $this->rejection_reason = $row['rejection_reason'];
-            $this->created_at = $row['created_at'];
+            $this->motivo_rejeicao = $row['motivo_rejeicao'];
+            $this->criado_em = $row['criado_em'];
             return true;
         }
 
         return false;
     }
 
-    // Update order status
-    function updateStatus($new_status, $description = null, $rejection_reason = null) {
+    // Atualizar status do pedido
+    function updateStatus($novo_status, $descricao = null, $motivo_rejeicao = null) {
         $query = "UPDATE " . $this->table_name . " 
                   SET status = :status";
         
-        if($rejection_reason) {
-            $query .= ", rejection_reason = :rejection_reason";
+        if($motivo_rejeicao) {
+            $query .= ", motivo_rejeicao = :motivo_rejeicao";
         }
         
         $query .= " WHERE id = :id";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":status", $new_status);
+        $stmt->bindParam(":status", $novo_status);
         $stmt->bindParam(":id", $this->id);
         
-        if($rejection_reason) {
-            $stmt->bindParam(":rejection_reason", $rejection_reason);
+        if($motivo_rejeicao) {
+            $stmt->bindParam(":motivo_rejeicao", $motivo_rejeicao);
         }
 
         if($stmt->execute()) {
-            // Create status history entry
-            $desc = $description ?? $this->getStatusDescription($new_status);
-            if($rejection_reason) {
-                $desc = "Pedido recusado: " . $rejection_reason;
+            // Criar entrada no histórico de status
+            $desc = $descricao ?? $this->getStatusDescription($novo_status);
+            if($motivo_rejeicao) {
+                $desc = "Pedido recusado: " . $motivo_rejeicao;
             }
-            $this->createStatusHistory($new_status, $desc);
+            $this->createStatusHistory($novo_status, $desc);
             
-            $this->status = $new_status;
-            if($rejection_reason) {
-                $this->rejection_reason = $rejection_reason;
+            $this->status = $novo_status;
+            if($motivo_rejeicao) {
+                $this->motivo_rejeicao = $motivo_rejeicao;
             }
             return true;
         }
@@ -161,56 +161,56 @@ class Order {
         return false;
     }
 
-    // Create status history entry
-    private function createStatusHistory($status, $description) {
-        $query = "INSERT INTO order_status_history 
-                  (order_id, status, description) 
-                  VALUES (:order_id, :status, :description)";
+    // Criar entrada no histórico de status
+    private function createStatusHistory($status, $descricao) {
+        $query = "INSERT INTO historico_status_pedido 
+                  (pedido_id, status, descricao) 
+                  VALUES (:pedido_id, :status, :descricao)";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":order_id", $this->id);
+        $stmt->bindParam(":pedido_id", $this->id);
         $stmt->bindParam(":status", $status);
-        $stmt->bindParam(":description", $description);
+        $stmt->bindParam(":descricao", $descricao);
         $stmt->execute();
     }
 
-    // Get status history
+    // Obter histórico de status
     function getStatusHistory() {
-        $query = "SELECT * FROM order_status_history 
-                  WHERE order_id = :order_id 
-                  ORDER BY created_at ASC";
+        $query = "SELECT * FROM historico_status_pedido 
+                  WHERE pedido_id = :pedido_id 
+                  ORDER BY criado_em ASC";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":order_id", $this->id);
+        $stmt->bindParam(":pedido_id", $this->id);
         $stmt->execute();
 
         return $stmt;
     }
 
-    // Generate order number
+    // Gerar número do pedido
     private function generateOrderNumber() {
         $query = "SELECT COUNT(*) as count FROM " . $this->table_name;
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         
-        $orderNumber = $row['count'] + 1;
-        $date = date('dmY');
+        $numeroPedido = $row['count'] + 1;
+        $data = date('dmY');
         
-        return sprintf("#%03d-%s", $orderNumber, $date);
+        return sprintf("#%03d-%s", $numeroPedido, $data);
     }
 
-    // Get status description
+    // Obter descrição do status
     private function getStatusDescription($status) {
-        $descriptions = [
-            'pending' => 'Aguardando Confirmação',
-            'confirmed' => 'Em Preparação',
-            'ready' => 'Pronto',
-            'delivered' => 'Entregue',
-            'rejected' => 'Recusado'
+        $descricoes = [
+            'pendente' => 'Aguardando Confirmação',
+            'confirmado' => 'Em Preparação',
+            'pronto' => 'Pronto',
+            'entregue' => 'Entregue',
+            'rejeitado' => 'Recusado'
         ];
         
-        return $descriptions[$status] ?? $status;
+        return $descricoes[$status] ?? $status;
     }
 }
 ?>

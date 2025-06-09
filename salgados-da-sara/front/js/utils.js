@@ -26,7 +26,7 @@ const Utils = {
 
     // Generate order number
     generateOrderNumber: () => {
-        const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        const orders = JSON.parse(localStorage.getItem('pedidos') || '[]');
         const orderNumber = orders.length + 1;
         const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '');
         return `#${orderNumber.toString().padStart(3, '0')}-${date}`;
@@ -153,12 +153,12 @@ const Utils = {
 
     // Check if user is logged in
     isLoggedIn: () => {
-        return localStorage.getItem('currentUser') !== null;
+        return localStorage.getItem('usuarioAtual') !== null;
     },
 
     // Get current user
     getCurrentUser: () => {
-        return JSON.parse(localStorage.getItem('currentUser') || 'null');
+        return JSON.parse(localStorage.getItem('usuarioAtual') || 'null');
     },
 
     // Set loading state
@@ -185,7 +185,7 @@ const Utils = {
             try {
                 return JSON.parse(localStorage.getItem(key) || 'null');
             } catch (e) {
-                console.error('Error parsing localStorage data:', e);
+                console.error('Erro ao analisar dados do localStorage:', e);
                 return null;
             }
         },
@@ -194,7 +194,7 @@ const Utils = {
             try {
                 localStorage.setItem(key, JSON.stringify(value));
             } catch (e) {
-                console.error('Error saving to localStorage:', e);
+                console.error('Erro ao salvar no localStorage:', e);
             }
         },
 

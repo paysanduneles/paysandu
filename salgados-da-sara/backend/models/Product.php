@@ -1,43 +1,43 @@
 <?php
 class Product {
     private $conn;
-    private $table_name = "products";
+    private $table_name = "produtos";
 
     public $id;
-    public $name;
-    public $price;
-    public $category;
-    public $description;
-    public $is_portioned;
-    public $is_custom;
-    public $created_at;
+    public $nome;
+    public $preco;
+    public $categoria;
+    public $descricao;
+    public $eh_porcionado;
+    public $eh_personalizado;
+    public $criado_em;
 
     public function __construct($db) {
         $this->conn = $db;
     }
 
-    // Create product
+    // Criar produto
     function create() {
         $query = "INSERT INTO " . $this->table_name . " 
-                  (name, price, category, description, is_portioned, is_custom) 
-                  VALUES (:name, :price, :category, :description, :is_portioned, :is_custom)";
+                  (nome, preco, categoria, descricao, eh_porcionado, eh_personalizado) 
+                  VALUES (:nome, :preco, :categoria, :descricao, :eh_porcionado, :eh_personalizado)";
 
         $stmt = $this->conn->prepare($query);
 
-        // Sanitize
-        $this->name = htmlspecialchars(strip_tags($this->name));
-        $this->category = htmlspecialchars(strip_tags($this->category));
-        $this->description = htmlspecialchars(strip_tags($this->description));
-        $this->is_portioned = $this->is_portioned ?? false;
-        $this->is_custom = $this->is_custom ?? true;
+        // Sanitizar
+        $this->nome = htmlspecialchars(strip_tags($this->nome));
+        $this->categoria = htmlspecialchars(strip_tags($this->categoria));
+        $this->descricao = htmlspecialchars(strip_tags($this->descricao));
+        $this->eh_porcionado = $this->eh_porcionado ?? false;
+        $this->eh_personalizado = $this->eh_personalizado ?? true;
 
         // Bind values
-        $stmt->bindParam(":name", $this->name);
-        $stmt->bindParam(":price", $this->price);
-        $stmt->bindParam(":category", $this->category);
-        $stmt->bindParam(":description", $this->description);
-        $stmt->bindParam(":is_portioned", $this->is_portioned, PDO::PARAM_BOOL);
-        $stmt->bindParam(":is_custom", $this->is_custom, PDO::PARAM_BOOL);
+        $stmt->bindParam(":nome", $this->nome);
+        $stmt->bindParam(":preco", $this->preco);
+        $stmt->bindParam(":categoria", $this->categoria);
+        $stmt->bindParam(":descricao", $this->descricao);
+        $stmt->bindParam(":eh_porcionado", $this->eh_porcionado, PDO::PARAM_BOOL);
+        $stmt->bindParam(":eh_personalizado", $this->eh_personalizado, PDO::PARAM_BOOL);
 
         if($stmt->execute()) {
             $this->id = $this->conn->lastInsertId();
@@ -47,11 +47,11 @@ class Product {
         return false;
     }
 
-    // Read all products
+    // Ler todos os produtos
     function readAll() {
-        $query = "SELECT id, name, price, category, description, is_portioned, is_custom, created_at 
+        $query = "SELECT id, nome, preco, categoria, descricao, eh_porcionado, eh_personalizado, criado_em 
                   FROM " . $this->table_name . " 
-                  ORDER BY category, name";
+                  ORDER BY categoria, nome";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
@@ -59,9 +59,9 @@ class Product {
         return $stmt;
     }
 
-    // Read one product
+    // Ler um produto
     function readOne() {
-        $query = "SELECT id, name, price, category, description, is_portioned, is_custom, created_at 
+        $query = "SELECT id, nome, preco, categoria, descricao, eh_porcionado, eh_personalizado, criado_em 
                   FROM " . $this->table_name . " 
                   WHERE id = :id";
 
@@ -72,40 +72,40 @@ class Product {
         if($stmt->rowCount() > 0) {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            $this->name = $row['name'];
-            $this->price = $row['price'];
-            $this->category = $row['category'];
-            $this->description = $row['description'];
-            $this->is_portioned = $row['is_portioned'];
-            $this->is_custom = $row['is_custom'];
-            $this->created_at = $row['created_at'];
+            $this->nome = $row['nome'];
+            $this->preco = $row['preco'];
+            $this->categoria = $row['categoria'];
+            $this->descricao = $row['descricao'];
+            $this->eh_porcionado = $row['eh_porcionado'];
+            $this->eh_personalizado = $row['eh_personalizado'];
+            $this->criado_em = $row['criado_em'];
             return true;
         }
 
         return false;
     }
 
-    // Update product
+    // Atualizar produto
     function update() {
         $query = "UPDATE " . $this->table_name . " 
-                  SET name = :name, price = :price, category = :category, 
-                      description = :description, is_portioned = :is_portioned 
+                  SET nome = :nome, preco = :preco, categoria = :categoria, 
+                      descricao = :descricao, eh_porcionado = :eh_porcionado 
                   WHERE id = :id";
 
         $stmt = $this->conn->prepare($query);
 
-        // Sanitize
-        $this->name = htmlspecialchars(strip_tags($this->name));
-        $this->category = htmlspecialchars(strip_tags($this->category));
-        $this->description = htmlspecialchars(strip_tags($this->description));
-        $this->is_portioned = $this->is_portioned ?? false;
+        // Sanitizar
+        $this->nome = htmlspecialchars(strip_tags($this->nome));
+        $this->categoria = htmlspecialchars(strip_tags($this->categoria));
+        $this->descricao = htmlspecialchars(strip_tags($this->descricao));
+        $this->eh_porcionado = $this->eh_porcionado ?? false;
 
         // Bind values
-        $stmt->bindParam(":name", $this->name);
-        $stmt->bindParam(":price", $this->price);
-        $stmt->bindParam(":category", $this->category);
-        $stmt->bindParam(":description", $this->description);
-        $stmt->bindParam(":is_portioned", $this->is_portioned, PDO::PARAM_BOOL);
+        $stmt->bindParam(":nome", $this->nome);
+        $stmt->bindParam(":preco", $this->preco);
+        $stmt->bindParam(":categoria", $this->categoria);
+        $stmt->bindParam(":descricao", $this->descricao);
+        $stmt->bindParam(":eh_porcionado", $this->eh_porcionado, PDO::PARAM_BOOL);
         $stmt->bindParam(":id", $this->id);
 
         if($stmt->execute()) {
@@ -115,9 +115,9 @@ class Product {
         return false;
     }
 
-    // Delete product
+    // Excluir produto
     function delete() {
-        $query = "DELETE FROM " . $this->table_name . " WHERE id = :id AND is_custom = true";
+        $query = "DELETE FROM " . $this->table_name . " WHERE id = :id AND eh_personalizado = true";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $this->id);

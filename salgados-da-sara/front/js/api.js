@@ -33,7 +33,7 @@ const API = {
             const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.message || 'Erro na requisição');
+                throw new Error(data.mensagem || 'Erro na requisição');
             }
             
             return data;
@@ -51,31 +51,31 @@ const API = {
 
     // Métodos de autenticação
     auth: {
-        async login(phone, password) {
+        async login(telefone, senha) {
             return API.request('/auth/login', {
                 method: 'POST',
-                body: JSON.stringify({ phone, password })
+                body: JSON.stringify({ phone: telefone, password: senha })
             });
         },
 
-        async register(userData) {
+        async register(dadosUsuario) {
             return API.request('/auth/register', {
                 method: 'POST',
-                body: JSON.stringify(userData)
+                body: JSON.stringify(dadosUsuario)
             });
         },
 
-        async forgotPassword(phone) {
+        async forgotPassword(telefone) {
             return API.request('/auth/forgot-password', {
                 method: 'POST',
-                body: JSON.stringify({ phone })
+                body: JSON.stringify({ phone: telefone })
             });
         },
 
-        async adminLogin(username, password) {
+        async adminLogin(nomeUsuario, senha) {
             return API.request('/auth/admin-login', {
                 method: 'POST',
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username: nomeUsuario, password: senha })
             });
         }
     },
@@ -86,17 +86,17 @@ const API = {
             return API.request('/products');
         },
 
-        async create(productData) {
+        async create(dadosProduto) {
             return API.request('/products/create', {
                 method: 'POST',
-                body: JSON.stringify(productData)
+                body: JSON.stringify(dadosProduto)
             });
         },
 
-        async update(productData) {
+        async update(dadosProduto) {
             return API.request('/products/update', {
                 method: 'POST',
-                body: JSON.stringify(productData)
+                body: JSON.stringify(dadosProduto)
             });
         },
 
@@ -110,22 +110,22 @@ const API = {
 
     // Métodos de pedidos
     orders: {
-        async getAll(userId = null) {
-            const endpoint = userId ? `/orders?user_id=${userId}` : '/orders';
+        async getAll(usuarioId = null) {
+            const endpoint = usuarioId ? `/orders?user_id=${usuarioId}` : '/orders';
             return API.request(endpoint);
         },
 
-        async create(orderData) {
+        async create(dadosPedido) {
             return API.request('/orders/create', {
                 method: 'POST',
-                body: JSON.stringify(orderData)
+                body: JSON.stringify(dadosPedido)
             });
         },
 
-        async updateStatus(id, status, description = null, rejectionReason = null) {
+        async updateStatus(id, status, descricao = null, motivoRejeicao = null) {
             return API.request('/orders/update-status', {
                 method: 'POST',
-                body: JSON.stringify({ id, status, description, rejection_reason: rejectionReason })
+                body: JSON.stringify({ id, status, description: descricao, rejection_reason: motivoRejeicao })
             });
         }
     },
@@ -136,10 +136,10 @@ const API = {
             return API.request('/admin/admins');
         },
 
-        async createAdmin(adminData) {
+        async createAdmin(dadosAdmin) {
             return API.request('/admin/admins', {
                 method: 'POST',
-                body: JSON.stringify(adminData)
+                body: JSON.stringify(dadosAdmin)
             });
         },
 
@@ -157,14 +157,14 @@ const API = {
             return API.request('/config');
         },
 
-        async get(key) {
-            return API.request(`/config?key=${key}`);
+        async get(chave) {
+            return API.request(`/config?key=${chave}`);
         },
 
-        async set(key, value) {
+        async set(chave, valor) {
             return API.request('/config', {
                 method: 'POST',
-                body: JSON.stringify({ key, value })
+                body: JSON.stringify({ key: chave, value: valor })
             });
         }
     }

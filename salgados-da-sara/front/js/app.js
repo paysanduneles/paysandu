@@ -182,14 +182,14 @@ const History = {
         const historyContainer = document.getElementById('history-items');
         if (!historyContainer) return;
 
-        const currentUser = Auth.getCurrentUser();
-        if (!currentUser) return;
+        const usuarioAtual = Auth.getCurrentUser();
+        if (!usuarioAtual) return;
 
         try {
-            const response = await API.orders.getAll(currentUser.id);
+            const response = await API.orders.getAll(usuarioAtual.id);
             
-            if (response.success) {
-                const userOrders = response.data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            if (response.sucesso) {
+                const userOrders = response.dados.sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
 
                 if (userOrders.length === 0) {
                     historyContainer.innerHTML = `
@@ -205,18 +205,18 @@ const History = {
                 historyContainer.innerHTML = userOrders.map(order => `
                     <div class="history-item">
                         <div class="history-item-header">
-                            <div class="history-order-id">${order.order_number}</div>
-                            <div class="history-date">${Utils.formatDate(order.created_at)}</div>
+                            <div class="history-order-id">${order.numero_pedido}</div>
+                            <div class="history-date">${Utils.formatDate(order.criado_em)}</div>
                             <div class="history-status ${order.status}">
                                 ${Admin.getStatusLabel(order.status)}
                             </div>
                         </div>
                         
                         <div class="history-items-list">
-                            ${order.items.map(item => `
+                            ${order.itens.map(item => `
                                 <div class="order-item">
                                     <span>
-                                        ${item.quantity}x ${item.name}
+                                        ${item.quantity}x ${item.nome}
                                         (${Utils.getQuantityLabel(item.quantityType, item.unitCount)})
                                     </span>
                                     <span>${Utils.formatCurrency(item.totalPrice)}</span>
@@ -228,15 +228,15 @@ const History = {
                             Total: ${Utils.formatCurrency(order.total)}
                         </div>
                         
-                        ${order.status === 'rejected' && order.rejection_reason ? `
+                        ${order.status ===   'rejeitado' && order.motivo_rejeicao ? `
                             <div class="rejection-reason">
-                                <strong>Motivo da recusa:</strong> ${order.rejection_reason}
+                                <strong>Motivo da recusa:</strong> ${order.motivo_rejeicao}
                             </div>
                         ` : ''}
                     </div>
                 `).join('');
             } else {
-                throw new Error(response.message);
+                throw new Error(response.mensagem);
             }
         } catch (error) {
             console.error('Erro ao carregar histórico:', error);

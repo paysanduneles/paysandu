@@ -13,32 +13,32 @@ $data = json_decode(file_get_contents("php://input"));
 
 if(!empty($data->name) && !empty($data->price) && !empty($data->category)) {
     
-    $product->name = $data->name;
-    $product->price = $data->price;
-    $product->category = $data->category;
-    $product->description = $data->description ?? '';
-    $product->is_portioned = $data->is_portioned ?? false;
-    $product->is_custom = true;
+    $product->nome = $data->name;
+    $product->preco = $data->price;
+    $product->categoria = $data->category;
+    $product->descricao = $data->description ?? '';
+    $product->eh_porcionado = $data->is_portioned ?? false;
+    $product->eh_personalizado = true;
 
     if($product->create()) {
         http_response_code(201);
         echo json_encode(array(
-            "success" => true,
-            "message" => "Produto criado com sucesso!",
+            "sucesso" => true,
+            "mensagem" => "Produto criado com sucesso!",
             "id" => $product->id
         ));
     } else {
         http_response_code(500);
         echo json_encode(array(
-            "success" => false,
-            "message" => "Erro ao criar produto"
+            "sucesso" => false,
+            "mensagem" => "Erro ao criar produto"
         ));
     }
 } else {
     http_response_code(400);
     echo json_encode(array(
-        "success" => false,
-        "message" => "Dados incompletos"
+        "sucesso" => false,
+        "mensagem" => "Dados incompletos"
     ));
 }
 ?>

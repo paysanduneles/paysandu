@@ -42,7 +42,17 @@ try {
 
     foreach($required_fields as $field) {
         if(empty($data->$field)) {
-            $errors[$field] = ucfirst($field) . " é obrigatório";
+            $field_names = [
+                'name' => 'Nome',
+                'phone' => 'Telefone', 
+                'email' => 'Email',
+                'address' => 'Endereço',
+                'number' => 'Número',
+                'city' => 'Cidade',
+                'password' => 'Senha',
+                'confirmPassword' => 'Confirmação de Senha'
+            ];
+            $errors[$field] = $field_names[$field] . " é obrigatório";
         }
     }
 
@@ -63,7 +73,7 @@ try {
 
     // Check if user already exists
     if(empty($errors)) {
-        $user->phone = $data->phone;
+        $user->telefone = $data->phone;
         $user->email = $data->email;
         
         if($user->userExists()) {
@@ -74,39 +84,39 @@ try {
     if(!empty($errors)) {
         http_response_code(400);
         echo json_encode(array(
-            "success" => false,
-            "errors" => $errors
+            "sucesso" => false,
+            "erros" => $errors
         ));
     } else {
         // Set user properties
-        $user->name = $data->name;
-        $user->phone = $data->phone;
+        $user->nome = $data->name;
+        $user->telefone = $data->phone;
         $user->email = $data->email;
-        $user->address = $data->address;
-        $user->number = $data->number;
-        $user->complement = $data->complement ?? '';
-        $user->city = $data->city;
-        $user->password = $data->password;
-        $user->is_admin = false;
+        $user->endereco = $data->address;
+        $user->numero = $data->number;
+        $user->complemento = $data->complement ?? '';
+        $user->cidade = $data->city;
+        $user->senha = $data->password;
+        $user->eh_admin = false;
 
         if($user->create()) {
             // Get the created user data
             $user->readOne();
             
             $response = array(
-                "success" => true,
-                "message" => "Conta criada com sucesso!",
-                "user" => array(
+                "sucesso" => true,
+                "mensagem" => "Conta criada com sucesso!",
+                "usuario" => array(
                     "id" => $user->id,
-                    "name" => $user->name,
-                    "phone" => $user->phone,
+                    "nome" => $user->nome,
+                    "telefone" => $user->telefone,
                     "email" => $user->email,
-                    "address" => $user->address,
-                    "number" => $user->number,
-                    "complement" => $user->complement,
-                    "city" => $user->city,
-                    "is_admin" => $user->is_admin,
-                    "created_at" => $user->created_at
+                    "endereco" => $user->endereco,
+                    "numero" => $user->numero,
+                    "complemento" => $user->complemento,
+                    "cidade" => $user->cidade,
+                    "eh_admin" => $user->eh_admin,
+                    "criado_em" => $user->criado_em
                 )
             );
             
@@ -115,8 +125,8 @@ try {
         } else {
             http_response_code(500);
             echo json_encode(array(
-                "success" => false,
-                "message" => "Erro ao criar conta"
+                "sucesso" => false,
+                "mensagem" => "Erro ao criar conta"
             ));
         }
     }
@@ -124,8 +134,8 @@ try {
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
-        'success' => false,
-        'message' => 'Erro interno: ' . $e->getMessage()
+        'sucesso' => false,
+        'mensagem' => 'Erro interno: ' . $e->getMessage()
     ]);
 }
 ?>

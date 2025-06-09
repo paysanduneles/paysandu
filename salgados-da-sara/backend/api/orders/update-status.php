@@ -17,34 +17,34 @@ if(!empty($data->id) && !empty($data->status)) {
     
     // Read current order data
     if($order->readOne()) {
-        $description = $data->description ?? null;
-        $rejection_reason = $data->rejection_reason ?? null;
+        $descricao = $data->description ?? null;
+        $motivo_rejeicao = $data->rejection_reason ?? null;
         
-        if($order->updateStatus($data->status, $description, $rejection_reason)) {
+        if($order->updateStatus($data->status, $descricao, $motivo_rejeicao)) {
             http_response_code(200);
             echo json_encode(array(
-                "success" => true,
-                "message" => "Status do pedido atualizado com sucesso!"
+                "sucesso" => true,
+                "mensagem" => "Status do pedido atualizado com sucesso!"
             ));
         } else {
             http_response_code(500);
             echo json_encode(array(
-                "success" => false,
-                "message" => "Erro ao atualizar status do pedido"
+                "sucesso" => false,
+                "mensagem" => "Erro ao atualizar status do pedido"
             ));
         }
     } else {
         http_response_code(404);
         echo json_encode(array(
-            "success" => false,
-            "message" => "Pedido não encontrado"
+            "sucesso" => false,
+            "mensagem" => "Pedido não encontrado"
         ));
     }
 } else {
     http_response_code(400);
     echo json_encode(array(
-        "success" => false,
-        "message" => "Dados incompletos"
+        "sucesso" => false,
+        "mensagem" => "Dados incompletos"
     ));
 }
 ?>

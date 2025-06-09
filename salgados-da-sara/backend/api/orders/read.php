@@ -27,18 +27,18 @@ if($num > 0) {
         
         $order_item = array(
             "id" => $id,
-            "order_number" => $order_number,
-            "user_id" => $user_id,
-            "customer_data" => json_decode($customer_data, true),
-            "items" => json_decode($items, true),
+            "numero_pedido" => $numero_pedido,
+            "usuario_id" => $usuario_id,
+            "dados_cliente" => json_decode($dados_cliente, true),
+            "itens" => json_decode($itens, true),
             "subtotal" => floatval($subtotal),
-            "delivery_fee" => floatval($delivery_fee),
+            "taxa_entrega" => floatval($taxa_entrega),
             "total" => floatval($total),
-            "is_delivery" => $is_delivery,
-            "payment_method" => $payment_method,
+            "eh_entrega" => $eh_entrega,
+            "metodo_pagamento" => $metodo_pagamento,
             "status" => $status,
-            "rejection_reason" => $rejection_reason,
-            "created_at" => $created_at
+            "motivo_rejeicao" => $motivo_rejeicao,
+            "criado_em" => $criado_em
         );
         
         // Add status history
@@ -49,26 +49,26 @@ if($num > 0) {
         while($history_row = $history_stmt->fetch(PDO::FETCH_ASSOC)) {
             $status_history[] = array(
                 "status" => $history_row['status'],
-                "description" => $history_row['description'],
-                "created_at" => $history_row['created_at']
+                "descricao" => $history_row['descricao'],
+                "criado_em" => $history_row['criado_em']
             );
         }
         
-        $order_item["status_history"] = $status_history;
+        $order_item["historico_status"] = $status_history;
         
         array_push($orders_arr, $order_item);
     }
     
     http_response_code(200);
     echo json_encode(array(
-        "success" => true,
-        "data" => $orders_arr
+        "sucesso" => true,
+        "dados" => $orders_arr
     ));
 } else {
     http_response_code(200);
     echo json_encode(array(
-        "success" => true,
-        "data" => array()
+        "sucesso" => true,
+        "dados" => array()
     ));
 }
 ?>

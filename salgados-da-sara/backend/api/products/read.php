@@ -19,13 +19,13 @@ if($num > 0) {
         
         $product_item = array(
             "id" => $id,
-            "name" => $name,
-            "price" => floatval($price),
-            "category" => $category,
-            "description" => $description,
-            "is_portioned" => $is_portioned,
-            "is_custom" => $is_custom,
-            "created_at" => $created_at
+            "nome" => $nome,
+            "preco" => floatval($preco),
+            "categoria" => $categoria,
+            "descricao" => $descricao,
+            "eh_porcionado" => $eh_porcionado,
+            "eh_personalizado" => $eh_personalizado,
+            "criado_em" => $criado_em
         );
         
         array_push($products_arr, $product_item);
@@ -33,14 +33,14 @@ if($num > 0) {
     
     http_response_code(200);
     echo json_encode(array(
-        "success" => true,
-        "data" => $products_arr
+        "sucesso" => true,
+        "dados" => $products_arr
     ));
 } else {
     http_response_code(200);
     echo json_encode(array(
-        "success" => true,
-        "data" => array()
+        "sucesso" => true,
+        "dados" => array()
     ));
 }
 ?>

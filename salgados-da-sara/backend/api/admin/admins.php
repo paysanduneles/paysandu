@@ -24,9 +24,9 @@ switch($method) {
                 
                 $admin_item = array(
                     "id" => $id,
-                    "username" => $username,
-                    "role" => $role,
-                    "created_at" => $created_at
+                    "nome_usuario" => $nome_usuario,
+                    "funcao" => $funcao,
+                    "criado_em" => $criado_em
                 );
                 
                 array_push($admins_arr, $admin_item);
@@ -34,14 +34,14 @@ switch($method) {
             
             http_response_code(200);
             echo json_encode(array(
-                "success" => true,
-                "data" => $admins_arr
+                "sucesso" => true,
+                "dados" => $admins_arr
             ));
         } else {
             http_response_code(200);
             echo json_encode(array(
-                "success" => true,
-                "data" => array()
+                "sucesso" => true,
+                "dados" => array()
             ));
         }
         break;
@@ -52,40 +52,40 @@ switch($method) {
         
         if(!empty($data->username) && !empty($data->password) && !empty($data->role)) {
             
-            $admin->username = $data->username;
+            $admin->nome_usuario = $data->username;
             
             // Check if username exists
             if($admin->usernameExists()) {
                 http_response_code(400);
                 echo json_encode(array(
-                    "success" => false,
-                    "message" => "Nome de usuário já existe!"
+                    "sucesso" => false,
+                    "mensagem" => "Nome de usuário já existe!"
                 ));
                 break;
             }
             
-            $admin->password = $data->password;
-            $admin->role = $data->role;
+            $admin->senha = $data->password;
+            $admin->funcao = $data->role;
 
             if($admin->create()) {
                 http_response_code(201);
                 echo json_encode(array(
-                    "success" => true,
-                    "message" => "Administrador criado com sucesso!",
+                    "sucesso" => true,
+                    "mensagem" => "Administrador criado com sucesso!",
                     "id" => $admin->id
                 ));
             } else {
                 http_response_code(500);
                 echo json_encode(array(
-                    "success" => false,
-                    "message" => "Erro ao criar administrador"
+                    "sucesso" => false,
+                    "mensagem" => "Erro ao criar administrador"
                 ));
             }
         } else {
             http_response_code(400);
             echo json_encode(array(
-                "success" => false,
-                "message" => "Dados incompletos"
+                "sucesso" => false,
+                "mensagem" => "Dados incompletos"
             ));
         }
         break;
@@ -100,21 +100,21 @@ switch($method) {
             if($admin->delete()) {
                 http_response_code(200);
                 echo json_encode(array(
-                    "success" => true,
-                    "message" => "Administrador excluído com sucesso!"
+                    "sucesso" => true,
+                    "mensagem" => "Administrador excluído com sucesso!"
                 ));
             } else {
                 http_response_code(500);
                 echo json_encode(array(
-                    "success" => false,
-                    "message" => "Erro ao excluir administrador"
+                    "sucesso" => false,
+                    "mensagem" => "Erro ao excluir administrador"
                 ));
             }
         } else {
             http_response_code(400);
             echo json_encode(array(
-                "success" => false,
-                "message" => "ID do administrador é obrigatório"
+                "sucesso" => false,
+                "mensagem" => "ID do administrador é obrigatório"
             ));
         }
         break;
@@ -122,8 +122,8 @@ switch($method) {
     default:
         http_response_code(405);
         echo json_encode(array(
-            "success" => false,
-            "message" => "Método não permitido"
+            "sucesso" => false,
+            "mensagem" => "Método não permitido"
         ));
         break;
 }

@@ -1,102 +1,102 @@
 // Authentication Module
 const Auth = {
-    currentUser: null,
-    currentAdmin: null,
+    usuarioAtual: null,
+    adminAtual: null,
 
     // Initialize
     init: () => {
         // Carregar usuário do localStorage (para manter sessão)
-        Auth.currentUser = Utils.storage.get('currentUser');
-        Auth.currentAdmin = Utils.storage.get('currentAdmin');
+        Auth.usuarioAtual = Utils.storage.get('usuarioAtual');
+        Auth.adminAtual = Utils.storage.get('adminAtual');
     },
 
     // Login user
-    login: async (phone, password) => {
+    login: async (telefone, senha) => {
         try {
-            const response = await API.auth.login(phone, password);
+            const response = await API.auth.login(telefone, senha);
             
-            if (response.success) {
-                Auth.currentUser = response.user;
-                Utils.storage.set('currentUser', response.user);
-                return { success: true, user: response.user };
+            if (response.sucesso) {
+                Auth.usuarioAtual = response.usuario;
+                Utils.storage.set('usuarioAtual', response.usuario);
+                return { sucesso: true, usuario: response.usuario };
             }
             
-            return { success: false, message: response.message };
+            return { sucesso: false, mensagem: response.mensagem };
         } catch (error) {
-            return { success: false, message: error.message };
+            return { sucesso: false, mensagem: error.message };
         }
     },
 
     // Register user
-    register: async (userData) => {
+    register: async (dadosUsuario) => {
         try {
-            const response = await API.auth.register(userData);
+            const response = await API.auth.register(dadosUsuario);
             
-            if (response.success) {
-                Auth.currentUser = response.user;
-                Utils.storage.set('currentUser', response.user);
-                return { success: true, user: response.user };
+            if (response.sucesso) {
+                Auth.usuarioAtual = response.usuario;
+                Utils.storage.set('usuarioAtual', response.usuario);
+                return { sucesso: true, usuario: response.usuario };
             }
             
-            return { success: false, errors: response.errors };
+            return { sucesso: false, erros: response.erros };
         } catch (error) {
-            return { success: false, message: error.message };
+            return { sucesso: false, mensagem: error.message };
         }
     },
 
     // Forgot password
-    forgotPassword: async (phone) => {
+    forgotPassword: async (telefone) => {
         try {
-            const response = await API.auth.forgotPassword(phone);
+            const response = await API.auth.forgotPassword(telefone);
             return response;
         } catch (error) {
-            return { success: false, message: error.message };
+            return { sucesso: false, mensagem: error.message };
         }
     },
 
     // Admin login
-    adminLogin: async (username, password) => {
+    adminLogin: async (nomeUsuario, senha) => {
         try {
-            const response = await API.auth.adminLogin(username, password);
+            const response = await API.auth.adminLogin(nomeUsuario, senha);
             
-            if (response.success) {
-                Auth.currentAdmin = response.admin;
-                Utils.storage.set('currentAdmin', response.admin);
-                return { success: true, admin: response.admin };
+            if (response.sucesso) {
+                Auth.adminAtual = response.admin;
+                Utils.storage.set('adminAtual', response.admin);
+                return { sucesso: true, admin: response.admin };
             }
             
-            return { success: false, message: response.message };
+            return { sucesso: false, mensagem: response.mensagem };
         } catch (error) {
-            return { success: false, message: error.message };
+            return { sucesso: false, mensagem: error.message };
         }
     },
 
     // Logout
     logout: () => {
-        Auth.currentUser = null;
-        Auth.currentAdmin = null;
-        Utils.storage.remove('currentUser');
-        Utils.storage.remove('currentAdmin');
+        Auth.usuarioAtual = null;
+        Auth.adminAtual = null;
+        Utils.storage.remove('usuarioAtual');
+        Utils.storage.remove('adminAtual');
     },
 
     // Check if user is logged in
     isLoggedIn: () => {
-        return Auth.currentUser !== null;
+        return Auth.usuarioAtual !== null;
     },
 
     // Check if admin is logged in
     isAdminLoggedIn: () => {
-        return Auth.currentAdmin !== null;
+        return Auth.adminAtual !== null;
     },
 
     // Get current user
     getCurrentUser: () => {
-        return Auth.currentUser;
+        return Auth.usuarioAtual;
     },
 
     // Get current admin
     getCurrentAdmin: () => {
-        return Auth.currentAdmin;
+        return Auth.adminAtual;
     }
 };
 
@@ -109,20 +109,20 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             
             const formData = new FormData(loginForm);
-            const phone = formData.get('phone');
-            const password = formData.get('password');
+            const telefone = formData.get('phone');
+            const senha = formData.get('password');
 
             Utils.setLoading(true);
-            const result = await Auth.login(phone, password);
+            const result = await Auth.login(telefone, senha);
             Utils.setLoading(false);
             
-            if (result.success) {
+            if (result.sucesso) {
                 Utils.showMessage('Login realizado com sucesso!');
                 setTimeout(() => {
                     App.showMainApp();
                 }, 1000);
             } else {
-                Utils.showMessage(result.message, 'error');
+                Utils.showMessage(result.mensagem, 'error');
             }
         });
     }
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             
             const formData = new FormData(registerForm);
-            const userData = {
+            const dadosUsuario = {
                 name: formData.get('name'),
                 phone: formData.get('phone'),
                 email: formData.get('email'),
@@ -147,18 +147,18 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             Utils.setLoading(true);
-            const result = await Auth.register(userData);
+            const result = await Auth.register(dadosUsuario);
             Utils.setLoading(false);
             
-            if (result.success) {
+            if (result.sucesso) {
                 Utils.showMessage('Conta criada com sucesso!');
                 setTimeout(() => {
                     App.showMainApp();
                 }, 1000);
             } else {
-                if (result.errors) {
+                if (result.erros) {
                     // Show field-specific errors
-                    for (const field in result.errors) {
+                    for (const field in result.erros) {
                         const fieldEl = document.querySelector(`[name="${field}"]`);
                         if (fieldEl) {
                             const formGroup = fieldEl.closest('.form-group');
@@ -170,11 +170,11 @@ document.addEventListener('DOMContentLoaded', () => {
                                 errorEl.className = 'error-message';
                                 formGroup.appendChild(errorEl);
                             }
-                            errorEl.textContent = result.errors[field];
+                            errorEl.textContent = result.erros[field];
                         }
                     }
                 } else {
-                    Utils.showMessage(result.message, 'error');
+                    Utils.showMessage(result.mensagem, 'error');
                 }
             }
         });
@@ -199,16 +199,16 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             
             const formData = new FormData(forgotForm);
-            const phone = formData.get('phone');
+            const telefone = formData.get('phone');
 
             Utils.setLoading(true);
-            const result = await Auth.forgotPassword(phone);
+            const result = await Auth.forgotPassword(telefone);
             Utils.setLoading(false);
             
-            if (result.success) {
-                Utils.showMessage(result.message);
+            if (result.sucesso) {
+                Utils.showMessage(result.mensagem);
             } else {
-                Utils.showMessage(result.message, 'error');
+                Utils.showMessage(result.mensagem, 'error');
             }
         });
     }
@@ -220,20 +220,20 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             
             const formData = new FormData(adminLoginForm);
-            const username = formData.get('username');
-            const password = formData.get('password');
+            const nomeUsuario = formData.get('username');
+            const senha = formData.get('password');
 
             Utils.setLoading(true);
-            const result = await Auth.adminLogin(username, password);
+            const result = await Auth.adminLogin(nomeUsuario, senha);
             Utils.setLoading(false);
             
-            if (result.success) {
+            if (result.sucesso) {
                 Utils.showMessage('Login realizado com sucesso!');
                 document.getElementById('admin-login').style.display = 'none';
                 document.getElementById('admin-panel').style.display = 'flex';
                 Admin.init();
             } else {
-                Utils.showMessage(result.message, 'error');
+                Utils.showMessage(result.mensagem, 'error');
             }
         });
     }

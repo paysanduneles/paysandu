@@ -16,13 +16,13 @@ if(!empty($data->username) && !empty($data->password)) {
     if($admin->login($data->username, $data->password)) {
         
         $response = array(
-            "success" => true,
-            "message" => "Login realizado com sucesso!",
+            "sucesso" => true,
+            "mensagem" => "Login realizado com sucesso!",
             "admin" => array(
                 "id" => $admin->id,
-                "username" => $admin->username,
-                "role" => $admin->role,
-                "created_at" => $admin->created_at
+                "nome_usuario" => $admin->nome_usuario,
+                "funcao" => $admin->funcao,
+                "criado_em" => $admin->criado_em
             )
         );
         
@@ -31,15 +31,15 @@ if(!empty($data->username) && !empty($data->password)) {
     } else {
         http_response_code(401);
         echo json_encode(array(
-            "success" => false,
-            "message" => "Usuário ou senha incorretos"
+            "sucesso" => false,
+            "mensagem" => "Usuário ou senha incorretos"
         ));
     }
 } else {
     http_response_code(400);
     echo json_encode(array(
-        "success" => false,
-        "message" => "Dados incompletos"
+        "sucesso" => false,
+        "mensagem" => "Dados incompletos"
     ));
 }
 ?>
