@@ -37,6 +37,9 @@ const App = {
         document.getElementById('admin-page').style.display = 'none';
         document.getElementById('navbar').style.display = 'block';
         
+        // Update navbar based on login status
+        App.updateNavbar();
+        
         // Show default page (cardapio)
         App.showPage('cardapio');
         
@@ -47,6 +50,36 @@ const App = {
         // Only initialize history if user is logged in
         if (Auth.isLoggedIn()) {
             History.init();
+        }
+    },
+
+    // Update navbar based on authentication status
+    updateNavbar: () => {
+        const navbar = document.getElementById('navbar');
+        const navMenu = navbar.querySelector('.nav-menu');
+        
+        if (Auth.isLoggedIn()) {
+            // User is logged in - show full menu with logout
+            navMenu.innerHTML = `
+                <button class="nav-btn" onclick="showPage('cardapio')">Cardápio</button>
+                <button class="nav-btn" onclick="showPage('historico')">Histórico</button>
+                <button class="nav-btn cart-btn" onclick="showPage('carrinho')">
+                    Carrinho <span id="cart-count" class="cart-count">0</span>
+                </button>
+                <button class="nav-btn logout-btn" onclick="logout()">Sair</button>
+            `;
+        } else {
+            // User is not logged in - show limited menu with login
+            navMenu.innerHTML = `
+                <button class="nav-btn" onclick="showPage('cardapio')">Cardápio</button>
+                <button class="nav-btn" onclick="showLogin()">Entrar</button>
+                <button class="nav-btn" onclick="showAdminLogin()">Admin</button>
+            `;
+        }
+        
+        // Update cart count if user is logged in
+        if (Auth.isLoggedIn()) {
+            Cart.updateCartCount();
         }
     },
 
@@ -220,6 +253,12 @@ const History = {
 // Global navigation function
 function showPage(pageName) {
     App.showPage(pageName);
+}
+
+// Global function to show admin login
+function showAdminLogin() {
+    window.location.hash = '#admin';
+    App.showAdminPage();
 }
 
 // Handle URL changes for admin access

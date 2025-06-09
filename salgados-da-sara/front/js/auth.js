@@ -260,9 +260,10 @@ function showForgotPassword() {
 
 function logout() {
     Auth.logout();
+    Cart.clearCart(); // Limpar carrinho ao fazer logout
     Utils.showMessage('Logout realizado com sucesso!');
     setTimeout(() => {
-        App.showMainApp(); // Volta para o cardápio
+        App.showMainApp(); // Volta para o cardápio mas agora sem estar logado
     }, 1000);
 }
 
